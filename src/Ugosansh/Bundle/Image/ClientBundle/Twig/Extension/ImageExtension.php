@@ -56,6 +56,9 @@ class ImageExtension extends Twig_Extension
             'image_render' => new \Twig_Function_Method($this, 'getImageTag',
                 array('is_safe' => array('js', 'html'))
             ),
+            'image_render_no_specific_size' => new \Twig_Function_Method($this, 'getImageTagNoSpecificSize',
+                array('is_safe' => array('js', 'html'))
+            ),
             'image_default' => new \Twig_Function_Method($this, 'getDefaultImageTag',
                 array('is_safe' => array('js', 'html'))
             )
@@ -100,6 +103,23 @@ class ImageExtension extends Twig_Extension
     }
 
     /**
+     * render without specific size
+     *
+     * @param ImageInterface
+     *
+     * @return string
+     */
+    public function renderWithouSize(ImageInterface $image, array $attr = [])
+    {
+        $attr = array_merge([
+            'src'    => $image->getLink('url'),
+            'alt'    => $image->getTitle(),
+        ], $attr);
+
+        return $this->generateTag($attr);
+    }
+
+    /**
      * Create img html tag
      *
      * @param integer $id
@@ -122,6 +142,24 @@ class ImageExtension extends Twig_Extension
             $attr['width'] = $width;
             $attr['height'] = $height;
         }
+
+        return $this->generateTag($attr);
+    }
+
+    /**
+     * Create img html tag without size 
+     *
+     * @param integer $id
+     *
+     * @return string
+     */
+    public function getImageTagNoSpecificSize($id)
+    {
+        if ($image = $this->manager->getInfo($id)) {
+            return $this->renderWithouSize($image);
+        }
+
+        $attr['src'] = $this->default;
 
         return $this->generateTag($attr);
     }
